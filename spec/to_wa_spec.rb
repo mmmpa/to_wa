@@ -1,3 +1,5 @@
+require './spec/spec_helper'
+
 RSpec.describe ToWa do
   before(:all) { DatabaseCleaner.start }
   before(:all) { DatabaseCleaner.clean! }

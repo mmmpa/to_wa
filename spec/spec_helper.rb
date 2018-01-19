@@ -17,6 +17,9 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  config.before(:all) { DatabaseCleaner.start }
+  config.before(:all) { DatabaseCleaner.clean! }
 end
 
 class TestRecord < ActiveRecord::Base
