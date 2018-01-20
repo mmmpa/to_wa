@@ -36,7 +36,7 @@ TestRecord.to_wa(
 
 # Basic syntax
 
-```json
+```js
 { "operator": valuesArray }
 ```
 
