@@ -7,7 +7,7 @@
 # Installation
 
 ```ruby
-gem 'ToWa'
+gem 'to_wa'
 ```
 
 ```console

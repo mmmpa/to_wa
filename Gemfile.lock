@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    to_wa (0.1.0)
+    to_wa (0.2.0)
       activerecord
 
 GEM
