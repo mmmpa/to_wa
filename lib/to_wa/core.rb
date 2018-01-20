@@ -1,7 +1,5 @@
 module ToWa
   module Core
-    extend ::ToWa::Builder
-
     COMPARISON = {
       '==' => 'eq',
       '=' => 'eq',

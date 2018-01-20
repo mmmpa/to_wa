@@ -14,9 +14,31 @@ gem 'to_wa'
 bundle install
 ```
 
+## Use all columns and operators
+
 ```ruby
 class TestRecord < ActiveRecord::Base
   extend ToWa
+
+  permit_all_to_wa_operators!
+  permit_all_to_wa_columns!
+
+  # read section: Use specific table columns as left and right
+  permit_all_to_wa_specified_columns!
+end
+```
+
+## Or specify columns and operators
+
+```ruby
+class TestRecord < ActiveRecord::Base
+  extend ToWa
+
+  permit_to_wa_columns :a, :b, :x
+  permit_to_wa_operators :eq, :ne
+
+  # read section: Use specific table columns as left and right
+  permit_to_wa_specified_columns foo_records: [:a], bar_records: [:b]
 end
 ```
 

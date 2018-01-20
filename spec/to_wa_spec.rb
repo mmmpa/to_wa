@@ -1,5 +1,33 @@
 require './spec/spec_helper'
 
+class Dummy
+  def self.execute!(*)
+  end
+end
+
+class TestRecord < ActiveRecord::Base
+  extend ToWa
+
+  permit_all_to_wa_operators!
+  permit_all_to_wa_columns!
+  permit_all_to_wa_specified_columns!
+
+  has_many :users
+end
+
+class RestrictedRecord < ActiveRecord::Base
+  self.table_name = 'test_records'
+
+  extend ToWa
+
+  permit_to_wa_columns :a, :b, :x
+  permit_to_wa_operators :eq, :ne
+  permit_to_wa_specified_columns foo_records: [:a], bar_records: [:b]
+end
+
+class User < ActiveRecord::Base
+end
+
 RSpec.describe ToWa do
   before(:all) { DatabaseCleaner.start }
   before(:all) { DatabaseCleaner.clean! }
@@ -13,16 +41,16 @@ RSpec.describe ToWa do
   end
 
   it do
-    expect(ToWa::Core).to receive(:to_wa).once
-    TestRecord.to_wa({})
+    expect(ToWa::Builder).to receive(:new) { Dummy }.once
+    TestRecord.to_wa({ '=' => ['a', 'abc'] })
   end
 
   it do
-    expect(ToWa::Core).to receive(:to_wa).once
-    TestRecord.select(:id).to_wa({})
+    expect(ToWa::Builder).to receive(:new) { Dummy }.once
+    TestRecord.select(:id).to_wa({ '=' => ['a', 'abc'] })
   end
 
-  describe 'test' do
+  describe 'run query' do
     subject(:o) { TestRecord.to_wa(ex).ids }
     subject(:size) { TestRecord.to_wa(ex).count }
     subject { TestRecord.to_wa(ex) }
@@ -70,6 +98,40 @@ RSpec.describe ToWa do
       ToWa::Core::LOGICAL.keys.each do |op|
         expect { TestRecord.to_wa({ op => [{ '=' => ['a', 'aaa'] }, { '=' => ['a', 'aaa'] }] }).to_sql }.not_to raise_error
       end
+    end
+  end
+
+  describe 'restrict' do
+    subject { -> { RestrictedRecord.to_wa(ex).to_sql } }
+
+    context do
+      let(:ex) { { 'eq' => ['a', 'aaa'] } }
+      it { is_expected.not_to raise_error }
+    end
+
+    context do
+      let(:ex) { { 'matches' => ['a', 'aaa'] } }
+      it { is_expected.to raise_error(ToWa::DeniedOperator) }
+    end
+
+    context do
+      let(:ex) { { 'eq' => ['x', 1] } }
+      it { is_expected.not_to raise_error }
+    end
+
+    context do
+      let(:ex) { { 'eq' => ['z', 1] } }
+      it { is_expected.to raise_error(ToWa::DeniedColumn) }
+    end
+
+    context do
+      let(:ex) { { 'eq' => [{ 'col': ['foo_records', 'a'] }, { 'col': ['bar_records', 'b'] }] } }
+      it { is_expected.not_to raise_error }
+    end
+
+    context do
+      let(:ex) { { 'eq' => [{ 'col': ['foo_records', 'b'] }, { 'col': ['bar_records', 'b'] }] } }
+      it { is_expected.to raise_error(ToWa::DeniedColumn) }
     end
   end
 

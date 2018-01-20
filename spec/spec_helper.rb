@@ -21,11 +21,3 @@ RSpec.configure do |config|
   config.before(:all) { DatabaseCleaner.start }
   config.before(:all) { DatabaseCleaner.clean! }
 end
-
-class TestRecord < ActiveRecord::Base
-  extend ToWa
-  has_many :users
-end
-
-class User < ActiveRecord::Base
-end

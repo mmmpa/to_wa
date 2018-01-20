@@ -14,6 +14,7 @@ class ToWaTestMigration < ActiveRecord::Migration[5.1]
         t.integer :x
         t.integer :y
         t.integer :z
+        t.string :denied_column
       end
     rescue
       nil
