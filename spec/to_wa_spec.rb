@@ -196,4 +196,18 @@ RSpec.describe ToWa do
       it { is_expected.to include('(`test_records`.`x` = 1 OR `test_records`.`y` = 2)') }
     end
   end
+
+  describe 'to Arel::Nodes::Foo' do
+    subject { ToWa(Arel::Table.new('some_table'), ex).to_sql }
+
+    context do
+      let(:ex) { { '=' => ['x', 1] } }
+      it { is_expected.to eq("`some_table`.`x` = 1") }
+    end
+
+    context do
+      let(:ex) { { 'and' => [{ '=' => ['x', 1] }, { '=' => ['y', 2] }] } }
+      it { is_expected.to eq("(`some_table`.`x` = 1 AND `some_table`.`y` = 2)") }
+    end
+  end
 end

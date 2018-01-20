@@ -1,39 +1,156 @@
+[![CircleCI](https://circleci.com/gh/mmmpa/to_wa.svg?style=svg)](https://circleci.com/gh/mmmpa/to_wa)
+
 # ToWa
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/to_wa`. To experiment with that code, run `bin/console` for an interactive prompt.
+"ToWa" adds `to_wa` method to ActiveRecord based class. `to_wa` method can receive `Hash` or `JSON` argument and add them as `Where` to ActiveRecord query.
 
-TODO: Delete this and the text above, and describe your gem
-
-## Installation
-
-Add this line to your application's Gemfile:
+# Installation
 
 ```ruby
-gem 'to_wa'
+gem 'ToWa'
 ```
 
-And then execute:
+```console
+bundle install
+```
 
-    $ bundle
+```ruby
+class TestRecord < ActiveRecord::Base
+  extend ToWa
+end
+```
 
-Or install it yourself as:
+## Simple usage
 
-    $ gem install to_wa
+```ruby
+TestRecord.to_wa(
+  {
+    'and': [
+      { '=': ['name', 'ToWa'] },
+      { '=': ['gender', 'male'] }
+    ]
+  }
+).to_sql
+#=> "SELECT `test_records`.* FROM `test_records` WHERE (`test_records`.`name` = 'ToWa' AND `test_records`.`genderb` = 'malebbb')"
+```
 
-## Usage
+# Basic syntax
 
-TODO: Write usage instructions here
+```json
+{ "operator": valuesArray }
+```
 
-## Development
+## Comparison operators
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+They receive `[left, right]`.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```js
+{ "=": ["name", "ToWa"] } // means "name eq ToWa"
+```
 
-## Contributing
+|alias|operator||
+|:---|:---|:---|
+==|eq|
+=|eq|
+eq|eq|
+!=|not_eq|
+<>|not_eq|
+ne|not_eq|
+>|gt|
+gt|gt|
+>=|gteq|
+gteq|gteq|
+<|lt|
+lt|lt|
+<=|lteq|
+lteq|lteq|
+matches|matches|`right like "%right%"` (% in right will be escaped.)
+like|matches|
+in|in|`right` must be Array. `left in (right)`
+between|between|`right` must be Array. `left between right[0] and right[1]`
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/to_wa.
+## Logical Operators
 
-## License
+They receive data list.
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+```js
+{
+  "and": [
+    { "=": ["name", "ToWa"] },
+    { "=": ["gender", "male"] },
+    {
+      "or": [
+        { "<": ["age", 12] },
+        { ">": ["age", 16] }
+      ]
+    }
+  ]
+} // means "(name EQ ToWa AND name EQ ToWa AND (age < 12 OR age > 16))"
+```
+
+|alias|operator||
+|:---|:---|:---|
+&&|and|
+and|and|
+\|\||or|
+or|or|
+not|not|It must receive Array that includes only one data. `{ "not": [{ "name": "ToWa" }] }`
+
+
+# Usage
+
+(Ofcourse, `ActiveRecord::Relation` will be provided after `to_wa` without `to_sql`.)
+
+```ruby
+TestRecord.to_wa({ '=': ['name', 'ToWa'] }).to_sql
+#=> SELECT `test_records`.* FROM `test_records` WHERE `test_records`.`name` = 'ToWa'
+```
+
+```ruby
+TestRecord.to_wa(
+  {
+    'and': [
+      { '=': ['name', 'ToWa'] },
+      { '=': ['gender', 'male'] }
+    ]
+  }
+).to_sql
+#=> "SELECT `test_records`.* FROM `test_records` WHERE (`test_records`.`name` = 'ToWa' AND `test_records`.`genderb` = 'male')"
+```
+
+```ruby
+TestRecord.to_wa(
+  {
+    'and': [
+      {
+        'or': [
+          { '=': ['name', 'ToWa'] },
+          { '=': ['name', 'to_wa'] }
+        ]
+      },
+      { '=': ['gender', 'male'] }
+    ]
+  }
+).to_sql
+#=> "SELECT `test_records`.* FROM `test_records` WHERE ((`test_records`.`name` = 'ToWa' OR `test_records`.`name` = 'to_wa') AND `test_records`.`gender` = 'male')"
+```
+
+## Working with other query
+
+```ruby
+TestRecord.select(:id).to_wa({ '=': ['name', 'ToWa'] }).order(id: :desc).to_sql
+#=> "SELECT `test_records`.`id` FROM `test_records` WHERE `test_records`.`name` = 'ToWa' ORDER BY `test_records`.`id` DESC"
+```
+
+## Providing Arel::Nodes without ActiveRecord based class
+
+```ruby
+a = ToWa(Arel::Table.new('test_records'), { '=': ['name', 'ToWa'] })
+
+a.class
+#=> Arel::Nodes::Equality
+a.to_sql
+#=> "`test_records`.`name` = 'ToWa'"
+TestRecord.where(a).to_sql
+#=> "SELECT `test_records`.* FROM `test_records` WHERE `test_records`.`name` = 'ToWa'"
+```

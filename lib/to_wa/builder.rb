@@ -8,7 +8,7 @@ module ToWa
       ar.where(to_wa_raw(ar.arel_table, ex))
     end
 
-    def to_wa_raw(arel_table, ex)
+    def to_wa_raw(arel_table = nil, ex)
       decide(arel_table, ex.is_a?(String) ? JSON.parse(ex) : ex)
     end
 
