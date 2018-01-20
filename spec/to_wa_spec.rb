@@ -82,6 +82,16 @@ RSpec.describe ToWa do
     end
 
     context do
+      let(:ex) { { '=' => [{ 'col': ['some_a_records', 'a'] }, { 'col': ['some_b_records', 'b'] }] } }
+      it { is_expected.to include('`some_a_records`.`a` = `some_b_records`.`b`') }
+    end
+
+    context do
+      let(:ex) { { 'between' => [{ 'col': ['some_a_records', 'a'] }, [{ 'col': ['some_b_records', 'b'] }, { 'col': ['some_b_records', 'c'] }]] } }
+      it { is_expected.to include('(`some_a_records`.`a` >= `some_b_records`.`b` AND `some_a_records`.`a` <= `some_b_records`.`c`)') }
+    end
+
+    context do
       let(:ex) { { 'like' => ['a', 'aaa'] } }
       it { is_expected.to include("`test_records`.`a` LIKE '%aaa%'") }
     end
@@ -93,7 +103,7 @@ RSpec.describe ToWa do
 
     context do
       let(:ex) { { 'between' => ['x', [0, 3]] } }
-      it { is_expected.to include('`test_records`.`x` BETWEEN 0 AND 3') }
+      it { is_expected.to include('(`test_records`.`x` >= 0 AND `test_records`.`x` <= 3)') }
     end
 
     context do
@@ -202,12 +212,12 @@ RSpec.describe ToWa do
 
     context do
       let(:ex) { { '=' => ['x', 1] } }
-      it { is_expected.to eq("`some_table`.`x` = 1") }
+      it { is_expected.to eq('`some_table`.`x` = 1') }
     end
 
     context do
       let(:ex) { { 'and' => [{ '=' => ['x', 1] }, { '=' => ['y', 2] }] } }
-      it { is_expected.to eq("(`some_table`.`x` = 1 AND `some_table`.`y` = 2)") }
+      it { is_expected.to eq('(`some_table`.`x` = 1 AND `some_table`.`y` = 2)') }
     end
   end
 end

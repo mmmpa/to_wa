@@ -96,7 +96,6 @@ and|and|
 or|or|
 not|not|It must receive Array that includes only one data. `{ "not": [{ "name": "ToWa" }] }`
 
-
 # Usage
 
 (Ofcourse, `ActiveRecord::Relation` will be provided after `to_wa` without `to_sql`.)
@@ -133,6 +132,28 @@ TestRecord.to_wa(
   }
 ).to_sql
 #=> "SELECT `test_records`.* FROM `test_records` WHERE ((`test_records`.`name` = 'ToWa' OR `test_records`.`name` = 'to_wa') AND `test_records`.`gender` = 'male')"
+```
+
+## Use specific table columns as left and right
+
+```ruby
+class TestRecord < ActiveRecord::Base
+  extend ToWa
+  has_many :users
+end
+
+class User < ActiveRecord::Base
+end
+
+TestRecord.left_outer_joins(:users).to_wa(
+  {
+    '>': [
+      { 'col': ['users', 'left_arm_length'] },
+      { 'col': ['users', 'right_arm_length'] }
+    ]
+  }
+).to_sql
+#=> "SELECT `test_records`.* FROM `test_records` LEFT OUTER JOIN `users` ON `users`.`test_record_id` = `test_records`.`id` WHERE (`users`.`left_arm_length` > `users`.`right_arm_length`)"
 ```
 
 ## Working with other query

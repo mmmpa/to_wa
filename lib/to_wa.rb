@@ -1,10 +1,9 @@
 require 'to_wa/version'
-require 'active_record'
+require 'to_wa/easy_hash_access'
+require 'to_wa/builder'
+require 'to_wa/core'
 
 module ToWa
-  require 'to_wa/builder'
-  require 'to_wa/core'
-
   def to_wa(o)
     ::ToWa::Core.to_wa(self, o)
   end

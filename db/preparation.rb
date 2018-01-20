@@ -11,4 +11,5 @@ rescue ActiveRecord::StatementInvalid => e
 end
 
 ActiveRecord::Base.establish_connection(ToWaTestConfiguration::FULL_SET)
+ToWaTestMigration.down
 ToWaTestMigration.up

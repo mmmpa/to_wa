@@ -24,4 +24,8 @@ end
 
 class TestRecord < ActiveRecord::Base
   extend ToWa
+  has_many :users
+end
+
+class User < ActiveRecord::Base
 end
