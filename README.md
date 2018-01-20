@@ -56,9 +56,9 @@ eq|eq|
 !=|not_eq|
 <>|not_eq|
 ne|not_eq|
->|gt|
+\>|gt|
 gt|gt|
->=|gteq|
+\>=|gteq|
 gteq|gteq|
 <|lt|
 lt|lt|
