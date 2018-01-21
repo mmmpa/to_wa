@@ -12,7 +12,6 @@ module ToWa
     where(
       ::ToWa::Builder.new(
         arel_table: arel_table,
-        restricted: true,
         permitted_columns: permitted_to_wa_columns,
         permitted_operators: permitted_to_wa_operators,
         permitted_specified_columns: permitted_to_wa_specified_columns,

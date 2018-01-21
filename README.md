@@ -1,4 +1,6 @@
 [![CircleCI](https://circleci.com/gh/mmmpa/to_wa.svg?style=svg)](https://circleci.com/gh/mmmpa/to_wa)
+[![Maintainability](https://api.codeclimate.com/v1/badges/82a4f55558f3066ad63f/maintainability)](https://codeclimate.com/github/mmmpa/to_wa/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/82a4f55558f3066ad63f/test_coverage)](https://codeclimate.com/github/mmmpa/to_wa/test_coverage)
 
 # ToWa
 

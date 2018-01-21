@@ -9,9 +9,9 @@ module ToWa
 
     # rubocop:disable Metrics/ParameterLists
     def initialize(
-      restricted:,
       ex:,
       arel_table:,
+      restricted: true,
       permitted_columns: Set.new,
       permitted_operators: Set.new,
       permitted_specified_columns: {}
@@ -76,12 +76,12 @@ module ToWa
     end
 
     def between_to_gteq_and_lteq(left, right)
-      decide({
+      decide(
         'and' => [
           { '>=' => [left, right.first] },
           { '<=' => [left, right.second] },
         ],
-      })
+      )
     end
 
     def normalize_left_table(left)

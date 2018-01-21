@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     parallelism: 1
-    working_directory: ~/circleci-demo-ruby-rails
+    working_directory: ~/repo
     docker:
       - image: circleci/ruby:2.4-node
         environment:
@@ -15,6 +15,13 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name:  Download cc-test-reporter
+          command: |
+            mkdir -p tmp/
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./tmp/cc-test-reporter
+            chmod +x ./tmp/cc-test-reporter
+
       # Which version of bundler?
       - run:
           name: Which bundler?
@@ -23,8 +30,8 @@ jobs:
       # Restore bundle cache
       - restore_cache:
           keys:
-            - rails-demo-bundle-v2-{{ checksum "Gemfile.lock" }}
-            - rails-demo-bundle-v2-
+            - to_wa-bundle-v2-{{ checksum "Gemfile.lock" }}
+            - to_wa-bundle-v2-
 
       - run:
           name: Bundle Install
@@ -32,7 +39,7 @@ jobs:
 
       # Store bundle cache
       - save_cache:
-          key: rails-demo-bundle-v2-{{ checksum "Gemfile.lock" }}
+          key: to_wa-bundle-v2-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
 
@@ -49,3 +56,9 @@ jobs:
         command: |
           bundle exec rspec -cfd \
                             $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+          ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/codeclimate.json coverage/.resultset.json
+
+      - run:
+          name: Upload coverage results to Code Climate
+          command: |
+            ./tmp/cc-test-reporter upload-coverage -i tmp/codeclimate.json
